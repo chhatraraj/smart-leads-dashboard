@@ -1,0 +1,18 @@
+node_modules/
+dist/
+.env
+*.env.local
+
+# Ignore logs and debug files
+logs/
+*.log
+
+
+# Ignore OS-specific files
+.DS_Store
+Thumbs.db
+
+
+# Ignore IDE/editor specific files
+.vscode/
+.idea/
