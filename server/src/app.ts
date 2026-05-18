@@ -8,6 +8,10 @@ import { env } from "./config/env";
 import { errorHandler } from "./middleware/errorHandler";
 import authRoutes from "./routes/auth.routes";
 
+import leadsRoutes from "./routes/leads.routes";
+import exportRoutes from "./routes/export.routes";
+
+
 const app: Application = express();
 
 app.use(helmet());
@@ -33,6 +37,10 @@ app.get("/api/health", (_req: Request, res: Response) => {
 
 // Routes
 app.use("/api/auth", authRoutes);
+
+// Lead management routes (CRUD + export) — all require auth
+app.use("/api/leads",  leadsRoutes);
+app.use("/api/export", exportRoutes);
 
 // 404
 app.use((_req: Request, res: Response) => {
