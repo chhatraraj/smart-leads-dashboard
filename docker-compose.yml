@@ -29,6 +29,19 @@ services:
       mongodb:
         condition: service_healthy
     restart: unless-stopped
-
+  frontend:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: gigflow-frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    restart: unless-stopped
+    
 volumes:
   mongo-data:

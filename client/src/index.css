@@ -1,0 +1,13 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/forms";
+
+@theme {
+  /* Enables dark mode toggling via adding the 'dark' class to the <html> tag */
+  --variant-dark: (&:where(.dark, .dark *));
+
+  /* Extends your custom primary color palette */
+  --color-primary-50: #eef2ff;
+  --color-primary-500: #6366f1;
+  --color-primary-600: #4f46e5;
+  --color-primary-700: #4338ca;
+}

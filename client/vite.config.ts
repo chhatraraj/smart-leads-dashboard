@@ -1,0 +1,15 @@
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
+
+export default defineConfig({
+  plugins: [
+    react(),
+    tailwindcss(), // Seamless v4 integration
+  ],
+  server: {
+    proxy: {
+      '/api': 'http://localhost:5000' // Forwards API calls to backend to prevent CORS issues
+    }
+  }
+})
