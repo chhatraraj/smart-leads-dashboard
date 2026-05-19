@@ -1,14 +1,13 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useNavigate } from 'react-router-dom'
 import api from '../services/api'
 import type { User } from '../types'
 import { useAuthStore } from '../store/authStore'
 import Navbar from '../components/layout/Navbar'
+import Sidebar from '../components/layout/Sidebar'
 import Button from '../components/ui/Button'
 
 export default function AdminPage() {
   const { user: me } = useAuthStore()
-  const navigate = useNavigate()
   const qc = useQueryClient()
 
   const { data, isLoading } = useQuery({
@@ -30,10 +29,14 @@ export default function AdminPage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
       <Navbar />
-      <main className="pt-16 max-w-5xl mx-auto px-4 py-8">
+      <Sidebar />
+      <main className="pt-16 lg:pl-64 max-w-5xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">User Management</h1>
-          <Button variant="secondary" size="sm" onClick={() => navigate('/')}>← Dashboard</Button>
+        </div>
+        <div className="mb-4 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+          <h3 className="text-sm font-medium text-gray-800 dark:text-gray-200">Admin role policy</h3>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Only existing admins may promote users to the admin role. Promotions are audited and should be granted sparingly.</p>
         </div>
         <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700">
           {isLoading ? (

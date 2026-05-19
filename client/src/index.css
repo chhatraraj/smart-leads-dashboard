@@ -11,3 +11,10 @@
   --color-primary-600: #4f46e5;
   --color-primary-700: #4338ca;
 }
+
+/* Smooth theme transitions when toggling dark mode */
+.theme-transition *,
+.theme-transition *::before,
+.theme-transition *::after {
+  transition: background-color 220ms ease, color 220ms ease, border-color 220ms ease;
+}

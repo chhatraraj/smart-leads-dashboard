@@ -47,12 +47,12 @@ export const authService = {
     name: string;
     email: string;
     password: string;
-    role?: "admin" | "sales_user";
   }): Promise<{ user: IUser; tokens: TokenPair }> {
     const existing = await User.findOne({ email: data.email });
     if (existing) throw new AppError("Email already in use", 409);
 
-    const user = await User.create(data);
+    // Force role to sales_user to prevent privilege escalation
+    const user = await User.create({ ...data, role: "sales_user" });
     const tokens = await generateTokenPair(user);
     return { user, tokens };
   },

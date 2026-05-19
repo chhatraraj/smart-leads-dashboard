@@ -17,20 +17,30 @@ type FormData = z.infer<typeof schema>
 export default function LoginPage() {
   const { setAuth } = useAuthStore()
   const navigate = useNavigate()
-  const [error, setError] = useState('')
+  const [error, setFormError] = useState('')
 
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({
+  const { register, handleSubmit, formState: { errors, isSubmitting }, setError } = useForm<FormData>({
     resolver: zodResolver(schema),
   })
+  const [showPassword, setShowPassword] = useState(false)
 
   const onSubmit = async (data: FormData) => {
     try {
-      setError('')
+      setFormError('')
       const res = await authService.login(data)
       setAuth(res.data.data.user, res.data.data.accessToken)
       navigate('/')
     } catch (e: any) {
-      setError(e.response?.data?.message ?? 'Login failed')
+      const status = e.response?.status
+      const message = e.response?.data?.message
+      if (status === 401) {
+        // Invalid credentials — show professional, non-technical message
+        setFormError(message ?? 'Invalid email or password. Please check your credentials and try again.')
+      } else if (status === 400) {
+        setFormError(message ?? 'Invalid request. Please check the form and try again.')
+      } else {
+        setFormError(message ?? 'Login failed. Please try again later.')
+      }
     }
   }
 
@@ -42,7 +52,31 @@ export default function LoginPage() {
         {error && <p className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg text-sm">{error}</p>}
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
           <Input label="Email" type="email" {...register('email')} error={errors.email?.message} placeholder="admin@gigflow.com" />
-          <Input label="Password" type="password" {...register('password')} error={errors.password?.message} placeholder="••••••••" />
+          <Input
+            label="Password"
+            type={showPassword ? 'text' : 'password'}
+            {...register('password')}
+            error={errors.password?.message}
+            placeholder="••••••••"
+            trailing={
+              <button type="button" onClick={() => setShowPassword(s => !s)} className="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-300">
+                {showPassword ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M10 3C6 3 2.73 5.11 1 8.5c.73 1.45 1.9 2.66 3.36 3.5A9.97 9.97 0 0010 15c4 0 7.27-2.11 9-5.5C17.27 5.11 14 3 10 3z" />
+                    <path d="M10 7a3 3 0 100 6 3 3 0 000-6z" />
+                  </svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="2">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M3 3l18 18" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9.88 9.88A3 3 0 0112 9c1.38 0 2.5 1.12 2.5 2.5" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M14.12 14.12A3 3 0 0112 15a3 3 0 01-2.5-2.5" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M2.5 12.5C4.23 15.89 7.5 18 11.5 18c.93 0 1.82-.13 2.66-.36" />
+</svg>
+
+                )}
+              </button>
+            }
+          />
           <Button type="submit" loading={isSubmitting} className="w-full justify-center mt-2">Sign in</Button>
         </form>
         <p className="text-sm text-center text-gray-500 dark:text-gray-400 mt-4">

@@ -18,6 +18,12 @@ api.interceptors.response.use(
   (res) => res,
   async (error) => {
     const original = error.config
+
+    // If the request was to auth endpoints (login/register/refresh), don't try to refresh
+    const url = original?.url || ''
+    const isAuthRoute = url.includes('/auth/login') || url.includes('/auth/register') || url.includes('/auth/refresh')
+    if (isAuthRoute) return Promise.reject(error)
+
     if (error.response?.status === 401 && !original._retry) {
       original._retry = true
       try {
@@ -28,7 +34,8 @@ api.interceptors.response.use(
         return api(original)
       } catch {
         useAuthStore.getState().clearAuth()
-        window.location.href = '/login'
+        // Let the original request handler deal with showing an error or redirecting
+        return Promise.reject(error)
       }
     }
     return Promise.reject(error)

@@ -118,7 +118,7 @@ See `.env.example` for all required variables.
 ```
 gigflow/
 ├── docker-compose.yml
-├── .gitignore
+├── .gitignore 
 ├── README.md
 ├── client/                    # React frontend
 │   ├── src/

@@ -3,6 +3,7 @@ import { useLeads } from '../hooks/useLeads'
 import { useDebounce } from '../hooks/useDebounce'
 import type { LeadFilters } from '../types'
 import Navbar from '../components/layout/Navbar'
+import Sidebar from '../components/layout/Sidebar'
 import FilterBar from '../components/filters/FilterBar'
 import LeadTable from '../components/leads/LeadTable'
 import Modal from '../components/ui/Modal'
@@ -23,7 +24,8 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
       <Navbar />
-      <main className="pt-16 max-w-7xl mx-auto px-4 sm:px-6 py-8">
+      <Sidebar />
+      <main className="pt-16 lg:pl-64 max-w-7xl mx-auto px-4 sm:px-6 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>

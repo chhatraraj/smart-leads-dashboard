@@ -12,28 +12,44 @@ const schema = z.object({
   name: z.string().min(2),
   email: z.string().email(),
   password: z.string().min(8).regex(/[A-Z]/, 'Need uppercase').regex(/[0-9]/, 'Need number'),
-  role: z.enum(['admin', 'sales_user']),
 })
 type FormData = z.infer<typeof schema>
 
 export default function RegisterPage() {
   const { setAuth } = useAuthStore()
   const navigate = useNavigate()
-  const [error, setError] = useState('')
+  const [error, setFormError] = useState('')
 
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({
+  const { register, handleSubmit, formState: { errors, isSubmitting }, setError } = useForm<FormData>({
     resolver: zodResolver(schema),
-    defaultValues: { role: 'sales_user' },
   })
+  const [showPassword, setShowPassword] = useState(false)
 
   const onSubmit = async (data: FormData) => {
     try {
-      setError('')
+      setFormError('')
       const res = await authService.register(data)
       setAuth(res.data.data.user, res.data.data.accessToken)
       navigate('/')
     } catch (e: any) {
-      setError(e.response?.data?.message ?? 'Registration failed')
+      const status = e.response?.status
+      const message = e.response?.data?.message
+
+      if (status === 409) {
+        // Email exists
+        setError('email', { type: 'server', message: message ?? 'Email already in use' })
+      } else if (status === 400 && typeof message === 'string') {
+        // Validation errors — split and attribute to fields
+        const parts = message.split(',').map((s: string) => s.trim())
+        parts.forEach((p: string) => {
+          const lower = p.toLowerCase()
+          if (lower.includes('email')) setError('email', { type: 'server', message: p })
+          else if (lower.includes('password')) setError('password', { type: 'server', message: p })
+          else if (lower.includes('name')) setError('name', { type: 'server', message: p })
+        })
+      } else {
+        setFormError(message ?? 'Registration failed')
+      }
     }
   }
 
@@ -46,14 +62,31 @@ export default function RegisterPage() {
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
           <Input label="Full Name" {...register('name')} error={errors.name?.message} placeholder="John Doe" />
           <Input label="Email" type="email" {...register('email')} error={errors.email?.message} />
-          <Input label="Password" type="password" {...register('password')} error={errors.password?.message} placeholder="Min 8 chars, 1 uppercase, 1 number" />
-          <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Role</label>
-            <select {...register('role')} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
-              <option value="sales_user">Sales User</option>
-              <option value="admin">Admin</option>
-            </select>
-          </div>
+          <Input
+            label="Password"
+            type={showPassword ? 'text' : 'password'}
+            {...register('password')}
+            error={errors.password?.message}
+            placeholder="Min 8 chars, 1 uppercase, 1 number"
+            trailing={
+              <button type="button" onClick={() => setShowPassword(s => !s)} className="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-300">
+                {showPassword ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M10 3C6 3 2.73 5.11 1 8.5c.73 1.45 1.9 2.66 3.36 3.5A9.97 9.97 0 0010 15c4 0 7.27-2.11 9-5.5C17.27 5.11 14 3 10 3z" />
+                    <path d="M10 7a3 3 0 100 6 3 3 0 000-6z" />
+                  </svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 3l18 18" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.88 9.88A3 3 0 0112 9c1.38 0 2.5 1.12 2.5 2.5" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M14.12 14.12A3 3 0 0112 15a3 3 0 01-2.5-2.5" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.5 12.5C4.23 15.89 7.5 18 11.5 18c.93 0 1.82-.13 2.66-.36" />
+                  </svg>
+                )}
+              </button>
+            }
+          />
+          {/* role removed: users register as sales_user by default */}
           <Button type="submit" loading={isSubmitting} className="w-full justify-center mt-2">Create account</Button>
         </form>
         <p className="text-sm text-center text-gray-500 dark:text-gray-400 mt-4">
