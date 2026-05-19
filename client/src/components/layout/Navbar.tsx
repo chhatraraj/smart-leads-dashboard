@@ -14,7 +14,7 @@ export default function Navbar() {
     try {
       await authService.logout()
       clearAuth()
-      navigate('/login')
+      navigate('/')
     } catch (error) {
       console.error('Logout failed:', error)
     }
@@ -26,12 +26,12 @@ export default function Navbar() {
     <nav className="h-16 border-b border-gray-100 dark:border-gray-800/60 bg-white/90 dark:bg-[#0E1322]/80 backdrop-blur-md px-6 flex items-center justify-between fixed top-0 left-0 right-0 z-50 transition-colors duration-200">
       {/* Brand Identity */}
       <Link to="/" className="text-lg font-bold tracking-tight text-indigo-600 dark:text-indigo-400 hover:opacity-90 transition-opacity">
-        GigFlow<span className="text-gray-400 dark:text-gray-500 font-normal">.io</span>
+        Smart Leads
       </Link>
       
       {/* Action Items */}
       <div className="flex items-center gap-4">
-        {user && (
+        {user ? (
           <div className="flex items-center gap-4 border-r border-gray-100 dark:border-gray-800 pr-4">
             <div className="flex items-center gap-2.5">
               <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{user?.name}</span>
@@ -73,17 +73,24 @@ export default function Navbar() {
                 Admin Panel
               </Link>
             )}
+
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleLogout}
+              className="text-xs font-medium text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 px-3 py-1.5 rounded-lg transition-all duration-200"
+            >
+              Logout
+            </Button>
+          </div>
+        ) : (
+          <div className="flex items-center gap-3">
+            <Link to="/login" className="text-sm text-gray-600 dark:text-gray-300 hover:underline">Login</Link>
+            <Link to="/register">
+              <Button size="sm" className="px-3 py-1.5">Sign Up</Button>
+            </Link>
           </div>
         )}
-
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleLogout}
-          className="text-xs font-medium text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 px-3 py-1.5 rounded-lg transition-all duration-200"
-        >
-          Logout
-        </Button>
       </div>
     </nav>
   )

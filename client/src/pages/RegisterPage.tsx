@@ -30,7 +30,7 @@ export default function RegisterPage() {
       setFormError('')
       const res = await authService.register(data)
       setAuth(res.data.data.user, res.data.data.accessToken)
-      navigate('/')
+      navigate('/app')
     } catch (e: any) {
       const status = e.response?.status
       const message = e.response?.data?.message
