@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { leadsService } from '../services/leads.service'
-import { LeadFilters } from '../types'
+import type { LeadFilters } from '../types'
 
 export const useLeads = (filters: LeadFilters) =>
   useQuery({

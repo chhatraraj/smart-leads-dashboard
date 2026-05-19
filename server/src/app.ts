@@ -7,7 +7,7 @@ import mongoose from "mongoose";
 import { env } from "./config/env";
 import { errorHandler } from "./middleware/errorHandler";
 import authRoutes from "./routes/auth.routes";
-
+import usersRoutes from "./routes/users.routes";
 import leadsRoutes from "./routes/leads.routes";
 import exportRoutes from "./routes/export.routes";
 
@@ -42,7 +42,11 @@ app.use("/api/auth", authRoutes);
 app.use("/api/leads",  leadsRoutes);
 app.use("/api/export", exportRoutes);
 
-// 404
+
+// User management routes — only for admins
+app.use("/api/users", usersRoutes);
+
+// 404 handler - must be after all other routes
 app.use((_req: Request, res: Response) => {
   res.status(404).json({ success: false, message: "Route not found" });
 });

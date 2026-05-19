@@ -1,5 +1,5 @@
 import api from './api'
-import { Lead, LeadFilters, LeadsResponse, ApiResponse } from '../types'
+import type { Lead, LeadFilters, LeadsResponse, ApiResponse } from '../types'
 
 export const leadsService = {
   getAll: (filters: LeadFilters = {}) =>
