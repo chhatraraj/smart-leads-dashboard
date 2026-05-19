@@ -5,6 +5,9 @@ import { useAuthStore } from '../store/authStore'
 import Navbar from '../components/layout/Navbar'
 import Sidebar from '../components/layout/Sidebar'
 import Button from '../components/ui/Button'
+import Modal from '../components/ui/Modal'
+import Input from '../components/ui/Input'
+import { useState } from 'react'
 
 export default function AdminPage() {
   const { user: me } = useAuthStore()
@@ -26,6 +29,17 @@ export default function AdminPage() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['users'] }),
   })
 
+  const createUser = useMutation({
+    mutationFn: (payload: { name: string; email: string; password: string; role: string }) => api.post('/users', payload),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['users'] }),
+  })
+
+  const [showCreate, setShowCreate] = useState(false)
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [role, setRole] = useState<'admin'|'sales_user'>('sales_user')
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
       <Navbar />
@@ -33,6 +47,9 @@ export default function AdminPage() {
       <main className="pt-16 lg:pl-64 max-w-5xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">User Management</h1>
+          <div>
+            <Button onClick={() => setShowCreate(true)}>+ New User</Button>
+          </div>
         </div>
         <div className="mb-4 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
           <h3 className="text-sm font-medium text-gray-800 dark:text-gray-200">Admin role policy</h3>
@@ -75,6 +92,26 @@ export default function AdminPage() {
           )}
         </div>
       </main>
+      <Modal open={showCreate} onClose={() => setShowCreate(false)} title="Create new user">
+        <div className="flex flex-col gap-4">
+          <Input label="Full name" value={name} onChange={e => setName(e.target.value)} />
+          <Input label="Email" type="email" value={email} onChange={e => setEmail(e.target.value)} />
+          <Input label="Password" type="password" value={password} onChange={e => setPassword(e.target.value)} />
+          <div>
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Role</label>
+            <select value={role} onChange={e => setRole(e.target.value as any)} className="mt-2 w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-600 text-sm">
+              <option value="sales_user">Sales User</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="ghost" onClick={() => setShowCreate(false)}>Cancel</Button>
+            <Button loading={createUser.isLoading} onClick={() => {
+              createUser.mutate({ name, email, password, role }, { onSuccess: () => setShowCreate(false) })
+            }}>Create</Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   )
 }
