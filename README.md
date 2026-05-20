@@ -1,5 +1,10 @@
  # GigFlow — Lead Management Dashboard
 
+## Live Demo
+- Frontend: https://smart-leads-dashboard-ten-green.vercel.app
+- Backend API:https://smart-leads-dashboard-1-ovz6.onrender.com/api/health
+
+
 ![React](https://img.shields.io/badge/React-17+-61DAFB?logo=react&logoColor=white) ![TypeScript](https://img.shields.io/badge/TypeScript-4.0-blue?logo=typescript&logoColor=white) ![Node.js](https://img.shields.io/badge/Node.js-18+-339933?logo=node.js&logoColor=white) ![MongoDB](https://img.shields.io/badge/MongoDB-5.0-green?logo=mongodb&logoColor=white)
 
 GigFlow is a full-stack lead management dashboard (React + TypeScript frontend, Node + Express backend, MongoDB) focused on fast lead workflows, role-based access, and CSV exports.
