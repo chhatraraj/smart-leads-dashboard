@@ -7,14 +7,20 @@ const getCtx = (req: Request) => ({
   isAdmin: req.user!.role === "admin",
 });
 
-const parseFilters = (q: any): LeadFilters => ({
-  status: q.status,
-  source: q.source,
-  search: q.search,
-  sort:   q.sort === "oldest" ? "oldest" : "latest",
-  page:   q.page  ? parseInt(q.page)  : 1,
-  limit:  q.limit ? parseInt(q.limit) : 10,
-});
+const parseFilters = (q: any): LeadFilters => {
+  const get = (v: any) => (Array.isArray(v) ? v[0] : v);
+  const page = get(q.page);
+  const limit = get(q.limit);
+  const sort = get(q.sort);
+  return {
+    status: get(q.status),
+    source: get(q.source),
+    search: get(q.search),
+    sort: sort === "oldest" ? "oldest" : "latest",
+    page: page ? parseInt(String(page)) : 1,
+    limit: limit ? parseInt(String(limit)) : 10,
+  };
+};
 
 export const leadsController = {
   getAll: asyncHandler(async (req: Request, res: Response) => {
@@ -25,7 +31,8 @@ export const leadsController = {
 
   getOne: asyncHandler(async (req: Request, res: Response) => {
     const { userId, isAdmin } = getCtx(req);
-    const lead = await leadsService.getOne(req.params.id, userId, isAdmin);
+    const leadId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    const lead = await leadsService.getOne(String(leadId), userId, isAdmin);
     res.json({ success: true, data: lead });
   }),
 
@@ -36,12 +43,14 @@ export const leadsController = {
 
   update: asyncHandler(async (req: Request, res: Response) => {
     const { userId, isAdmin } = getCtx(req);
-    const lead = await leadsService.update(req.params.id, req.body, userId, isAdmin);
+    const leadId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    const lead = await leadsService.update(String(leadId), req.body, userId, isAdmin);
     res.json({ success: true, data: lead });
   }),
 
   delete: asyncHandler(async (req: Request, res: Response) => {
-    await leadsService.delete(req.params.id);
+    const leadId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+    await leadsService.delete(String(leadId));
     res.json({ success: true, message: "Lead deleted" });
   }),
 };

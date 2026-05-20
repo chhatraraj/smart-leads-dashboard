@@ -21,7 +21,7 @@ const buildQuery = (
   userId?: string,
   isAdmin?: boolean
 ) => {
-  const query: mongoose.FilterQuery<ILead> = { isDeleted: false };
+  const query: any = { isDeleted: false };
 
   // Sales users only see their own leads
   if (!isAdmin && userId) query.createdBy = new mongoose.Types.ObjectId(userId);
