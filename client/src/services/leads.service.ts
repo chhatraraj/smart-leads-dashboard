@@ -20,8 +20,23 @@ export const leadsService = {
   delete: (id: string) =>
     api.delete(`/leads/${id}`),
 
-  exportCSV: (filters: LeadFilters = {}) => {
-    const params = new URLSearchParams(filters as any).toString()
-    window.open(`/api/export/leads/csv?${params}`, '_blank')
+  exportCSV: async (filters: LeadFilters = {}) => {
+    const response = await api.get('/export/leads/csv', {
+      params: filters as any,
+      responseType: 'blob',
+    })
+
+    const disposition = response.headers['content-disposition'] || ''
+    const match = /filename="?([^";]+)"?/.exec(disposition)
+    const filename = match ? match[1] : `leads-${Date.now()}.csv`
+
+    const url = window.URL.createObjectURL(new Blob([response.data]))
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', filename)
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    window.URL.revokeObjectURL(url)
   },
 }
