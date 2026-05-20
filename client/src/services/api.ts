@@ -1,8 +1,12 @@
 import axios from 'axios'
 import { useAuthStore } from '../store/authStore'
 
+const base = import.meta.env.VITE_API_URL
+  ? `${import.meta.env.VITE_API_URL}/api`
+  : '/api'
+
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: base,
   withCredentials: true, // sends cookies (refresh token)
 })
 
@@ -27,7 +31,10 @@ api.interceptors.response.use(
     if (error.response?.status === 401 && !original._retry) {
       original._retry = true
       try {
-        const { data } = await axios.post('/api/auth/refresh', {}, { withCredentials: true })
+        const refreshUrl = import.meta.env.VITE_API_URL
+          ? `${import.meta.env.VITE_API_URL}/api/auth/refresh`
+          : '/api/auth/refresh'
+        const { data } = await axios.post(refreshUrl, {}, { withCredentials: true })
         const newToken = data.data.accessToken
         useAuthStore.getState().setAccessToken(newToken)
         original.headers.Authorization = `Bearer ${newToken}`
