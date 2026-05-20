@@ -7,6 +7,7 @@ import Sidebar from '../components/layout/Sidebar'
 import Button from '../components/ui/Button'
 import Modal from '../components/ui/Modal'
 import Input from '../components/ui/Input'
+import ConfirmModal from '../components/ui/ConfirmModal'
 import { useState } from 'react'
 
 export default function AdminPage() {
@@ -29,6 +30,8 @@ export default function AdminPage() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['users'] }),
   })
 
+  const [userToDelete, setUserToDelete] = useState<User | null>(null)
+
   const createUser = useMutation({
     mutationFn: (payload: { name: string; email: string; password: string; role: string }) => api.post('/users', payload),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['users'] }),
@@ -39,6 +42,7 @@ export default function AdminPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [role, setRole] = useState<'admin'|'sales_user'>('sales_user')
+  const [createError, setCreateError] = useState('')
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
@@ -81,7 +85,7 @@ export default function AdminPage() {
                           <Button size="sm" variant="secondary" onClick={() => changeRole.mutate({ id: u._id, role: u.role === 'admin' ? 'sales_user' : 'admin' })}>
                             Make {u.role === 'admin' ? 'Sales' : 'Admin'}
                           </Button>
-                          <Button size="sm" variant="danger" onClick={() => { if (confirm('Delete user?')) deleteUser.mutate(u._id) }}>Delete</Button>
+                          <Button size="sm" variant="danger" onClick={() => setUserToDelete(u)}>Delete</Button>
                         </div>
                       ) : <span className="text-xs text-gray-400">You</span>}
                     </td>
@@ -91,6 +95,17 @@ export default function AdminPage() {
             </table>
           )}
         </div>
+        <ConfirmModal
+          open={!!userToDelete}
+          title="Delete user"
+          message={userToDelete ? `Delete user ${userToDelete.name}? This action cannot be undone.` : undefined}
+          loading={deleteUser.isLoading}
+          onClose={() => setUserToDelete(null)}
+          onConfirm={() => {
+            if (!userToDelete) return
+            deleteUser.mutate(userToDelete._id, { onSuccess: () => setUserToDelete(null) })
+          }}
+        />
       </main>
       <Modal open={showCreate} onClose={() => setShowCreate(false)} title="Create new user">
         <div className="flex flex-col gap-4">
@@ -104,10 +119,18 @@ export default function AdminPage() {
               <option value="admin">Admin</option>
             </select>
           </div>
+          {createError && <p className="text-sm text-red-600">{createError}</p>}
           <div className="flex justify-end gap-2">
             <Button variant="ghost" onClick={() => setShowCreate(false)}>Cancel</Button>
             <Button loading={createUser.isLoading} onClick={() => {
-              createUser.mutate({ name, email, password, role }, { onSuccess: () => setShowCreate(false) })
+              setCreateError('')
+              if (!name || !email || !password) { setCreateError('Please fill all fields'); return }
+              createUser.mutate({ name, email, password, role }, {
+                onSuccess: () => {
+                  setName(''); setEmail(''); setPassword(''); setRole('sales_user'); setShowCreate(false)
+                },
+                onError: (err: any) => setCreateError(err?.response?.data?.message || 'Failed to create user')
+              })
             }}>Create</Button>
           </div>
         </div>

@@ -13,6 +13,14 @@ router.get("/", asyncHandler(async (_req, res) => {
   res.json({ success: true, data: users });
 }));
 
+router.post("/", asyncHandler(async (req: Request, res: Response) => {
+  const { name, email, password, role } = req.body as { name: string; email: string; password: string; role?: string };
+  if (!name || !email || !password) throw new AppError("Name, email and password are required", 400);
+  // Prevent creating an admin unless explicitly provided and the caller is admin (middleware ensures admin)
+  const user = await User.create({ name, email, password, role: role === 'admin' ? 'admin' : 'sales_user' });
+  res.status(201).json({ success: true, data: user });
+}));
+
 router.patch("/:id/role", asyncHandler(async (req: Request, res: Response) => {
   if (req.params.id === req.user!._id.toString())
     throw new AppError("Cannot change your own role", 400);

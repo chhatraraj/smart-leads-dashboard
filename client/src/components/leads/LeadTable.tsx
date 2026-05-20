@@ -7,12 +7,14 @@ import Badge from '../ui/Badge'
 import Button from '../ui/Button'
 import Modal from '../ui/Modal'
 import LeadForm from './LeadForm'
+import ConfirmModal from '../ui/ConfirmModal'
 
 export default function LeadTable({ leads }: { leads: Lead[] }) {
   const { user } = useAuthStore()
   const navigate = useNavigate()
   const deleteLead = useDeleteLead()
   const [editing, setEditing] = useState<Lead | null>(null)
+  const [toDelete, setToDelete] = useState<Lead | null>(null)
 
   if (leads.length === 0) return (
     <div className="text-center py-16 text-gray-400 dark:text-gray-500">
@@ -46,8 +48,8 @@ export default function LeadTable({ leads }: { leads: Lead[] }) {
                   <div className="flex gap-2">
                     <Button size="sm" variant="ghost" onClick={() => setEditing(lead)}>Edit</Button>
                     {user?.role === 'admin' && (
-                      <Button size="sm" variant="danger" onClick={() => { if (confirm('Delete this lead?')) deleteLead.mutate(lead._id) }}>Del</Button>
-                    )}
+                          <Button size="sm" variant="danger" onClick={() => setToDelete(lead)}>Del</Button>
+                        )}
                   </div>
                 </td>
               </tr>
@@ -58,6 +60,18 @@ export default function LeadTable({ leads }: { leads: Lead[] }) {
       <Modal open={!!editing} onClose={() => setEditing(null)} title="Edit Lead">
         {editing && <LeadForm lead={editing} onClose={() => setEditing(null)} />}
       </Modal>
+
+      <ConfirmModal
+        open={!!toDelete}
+        title="Delete lead"
+        message={toDelete ? `Delete lead “${toDelete.name}”? This cannot be undone.` : undefined}
+        loading={deleteLead.isLoading}
+        onClose={() => setToDelete(null)}
+        onConfirm={() => {
+          if (!toDelete) return
+          deleteLead.mutate(toDelete._id, { onSuccess: () => setToDelete(null) })
+        }}
+      />
     </>
   )
 }
