@@ -1,8 +1,8 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import Navbar from '../components/layout/Navbar'
 import Button from '../components/ui/Button'
-import { Users, Filter, Shield, DownloadCloud, ArrowRight, CheckCircle2, Clock, BarChart3 } from 'lucide-react'
+import { Users, Filter, Shield, DownloadCloud, ArrowRight, CheckCircle2, BarChart3 } from 'lucide-react'
 
 // Professional feature card with subtle hover effect
 const FeatureCard = ({ icon, title, desc }: { icon: React.ReactNode; title: string; desc: string }) => (

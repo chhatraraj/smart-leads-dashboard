@@ -65,7 +65,7 @@ export default function LeadTable({ leads }: { leads: Lead[] }) {
         open={!!toDelete}
         title="Delete lead"
         message={toDelete ? `Delete lead “${toDelete.name}”? This cannot be undone.` : undefined}
-        loading={deleteLead.isLoading}
+        loading={deleteLead.status === 'pending'}
         onClose={() => setToDelete(null)}
         onConfirm={() => {
           if (!toDelete) return

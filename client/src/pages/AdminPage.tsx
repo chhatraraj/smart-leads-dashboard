@@ -99,7 +99,7 @@ export default function AdminPage() {
           open={!!userToDelete}
           title="Delete user"
           message={userToDelete ? `Delete user ${userToDelete.name}? This action cannot be undone.` : undefined}
-          loading={deleteUser.isLoading}
+          loading={deleteUser.status === 'pending'}
           onClose={() => setUserToDelete(null)}
           onConfirm={() => {
             if (!userToDelete) return
@@ -122,7 +122,7 @@ export default function AdminPage() {
           {createError && <p className="text-sm text-red-600">{createError}</p>}
           <div className="flex justify-end gap-2">
             <Button variant="ghost" onClick={() => setShowCreate(false)}>Cancel</Button>
-            <Button loading={createUser.isLoading} onClick={() => {
+            <Button loading={createUser.status === 'pending'} onClick={() => {
               setCreateError('')
               if (!name || !email || !password) { setCreateError('Please fill all fields'); return }
               createUser.mutate({ name, email, password, role }, {

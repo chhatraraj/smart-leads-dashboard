@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import type { ReactNode } from 'react'
 import { ThemeProvider } from './context/ThemeContext'
 import { useAuthStore } from './store/authStore'
 import LoginPage from './pages/LoginPage'
@@ -8,14 +9,14 @@ import LandingPage from './pages/LandingPage'
 import LeadDetailPage from './pages/LeadDetailPage'
 import AdminPage from './pages/AdminPage'
 
-const ProtectedRoute = ({ children, adminOnly = false }: { children: JSX.Element, adminOnly?: boolean }) => {
+const ProtectedRoute = ({ children, adminOnly = false }: { children: ReactNode, adminOnly?: boolean }) => {
   const { user, accessToken } = useAuthStore()
   if (!accessToken || !user) return <Navigate to="/login" replace />
   if (adminOnly && user.role !== 'admin') return <Navigate to="/" replace />
   return children
 }
 
-const PublicRoute = ({ children }: { children: JSX.Element }) => {
+const PublicRoute = ({ children }: { children: ReactNode }) => {
   const { accessToken } = useAuthStore()
   if (accessToken) return <Navigate to="/app" replace />
   return children

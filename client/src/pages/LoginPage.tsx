@@ -19,7 +19,7 @@ export default function LoginPage() {
   const navigate = useNavigate()
   const [error, setFormError] = useState('')
 
-  const { register, handleSubmit, formState: { errors, isSubmitting }, setError } = useForm<FormData>({
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
   })
   const [showPassword, setShowPassword] = useState(false)
