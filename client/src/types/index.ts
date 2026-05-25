@@ -14,6 +14,9 @@ export interface Lead {
   _id: string;
   name: string;
   email: string;
+  phone?: string;       
+  company?: string;    
+  notes?: string; 
   status: LeadStatus;
   source: LeadSource;
   createdBy: { _id: string; name: string; email: string };

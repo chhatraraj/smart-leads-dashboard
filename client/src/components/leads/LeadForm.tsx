@@ -9,7 +9,7 @@ import Button from '../ui/Button'
 const schema = z.object({
   name:   z.string().min(2),
   email:  z.string().email(),
-  status: z.enum(['New', 'Contacted', 'Qualified', 'Lost']),
+  status: z.enum(['New', 'Contacted', 'Qualified', 'Closed']),
   source: z.enum(['Website', 'Instagram', 'Referral']),
 })
 type FormData = z.infer<typeof schema>
