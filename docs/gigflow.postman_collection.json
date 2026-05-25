@@ -1,0 +1,165 @@
+{
+  "info": {
+    "name": "GigFlow — Lead Management API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5000/api" },
+    { "key": "token",   "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/auth/register",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"Admin User\",\"email\":\"admin@gigflow.com\",\"password\":\"Admin1234\"}"
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "exec": [
+                "const json = pm.response.json();",
+                "if (json.data && json.data.accessToken) {",
+                "  pm.collectionVariables.set('token', json.data.accessToken);",
+                "}"
+              ]
+            }
+          }],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"admin@gigflow.com\",\"password\":\"Admin1234\"}"
+            }
+          }
+        },
+        {
+          "name": "Me",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/auth/me",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/auth/refresh"
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/auth/logout",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Leads",
+      "item": [
+        {
+          "name": "Get All Leads",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/leads?page=1&limit=10&status=new&sort=latest",
+              "query": [
+                { "key": "page",   "value": "1" },
+                { "key": "limit",  "value": "10" },
+                { "key": "status", "value": "new" },
+                { "key": "sort",   "value": "latest" }
+              ]
+            },
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        },
+        {
+          "name": "Get All Leads — Filtered",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/leads?status=qualified&source=Instagram&search=rahul",
+              "query": [
+                { "key": "status", "value": "qualified" },
+                { "key": "source", "value": "Instagram" },
+                { "key": "search", "value": "rahul" }
+              ]
+            },
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        },
+        {
+          "name": "Create Lead",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/leads",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"Rahul Sharma\",\"email\":\"rahul@example.com\",\"phone\":\"+977-9800000000\",\"company\":\"TechCorp\",\"notes\":\"Interested in enterprise plan\",\"source\":\"Instagram\",\"status\":\"new\"}"
+            }
+          }
+        },
+        {
+          "name": "Get Single Lead",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/leads/:id",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        },
+        {
+          "name": "Update Lead",
+          "request": {
+            "method": "PATCH",
+            "url": "{{baseUrl}}/leads/:id",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"status\":\"contacted\",\"notes\":\"Called on May 25, interested\"}"
+            }
+          }
+        },
+        {
+          "name": "Delete Lead (Admin only)",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/leads/:id",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        },
+        {
+          "name": "Export CSV",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/export/leads/csv",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        }
+      ]
+    }
+  ]
+}
