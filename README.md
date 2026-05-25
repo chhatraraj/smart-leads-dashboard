@@ -1,118 +1,165 @@
- # GigFlow — Lead Management Dashboard
+# GigFlow — Smart Leads Dashboard
 
-## Live Demo
+A full-stack lead management dashboard built with the MERN stack and TypeScript.
 - Frontend: https://smart-leads-dashboard-ten-green.vercel.app
 - Backend API:https://smart-leads-dashboard-1-ovz6.onrender.com/api/health
 
+![TypeScript](https://img.shields.io/badge/TypeScript-Strict-blue?logo=typescript&logoColor=white)
+![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-20-339933?logo=node.js&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-7-green?logo=mongodb&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
 
-![React](https://img.shields.io/badge/React-17+-61DAFB?logo=react&logoColor=white) ![TypeScript](https://img.shields.io/badge/TypeScript-4.0-blue?logo=typescript&logoColor=white) ![Node.js](https://img.shields.io/badge/Node.js-18+-339933?logo=node.js&logoColor=white) ![MongoDB](https://img.shields.io/badge/MongoDB-5.0-green?logo=mongodb&logoColor=white)
+---
 
-GigFlow is a full-stack lead management dashboard (React + TypeScript frontend, Node + Express backend, MongoDB) focused on fast lead workflows, role-based access, and CSV exports.
+## Tech Stack
 
-## Table of contents
-- Project overview
-- Quick setup
-- Development
-- Environment
-- API documentation
-- Project structure
-- Contributing
+| Layer | Technology |
+|---|---|
+| Frontend | React 18, TypeScript, Vite, TailwindCSS |
+| State | Zustand (client state), React Query (server state) |
+| Backend | Node.js, Express.js, TypeScript |
+| Database | MongoDB 7, Mongoose ODM |
+| Auth | JWT access token + refresh token via httpOnly cookie |
+| Validation | Zod — frontend and backend |
+| Container | Docker + Docker Compose |
 
-## Project overview
-
-- Frontend: React, Vite, TypeScript, TailwindCSS
-- Backend: Node, Express, TypeScript, MongoDB, Mongoose
-- Auth: JWT with refresh rotation
-- RBAC: `admin` and `sales_user` roles
+---
 
 ## Features
 
-- JWT Authentication
-- Role-based access control
-- Lead filtering & search
-- CSV export
-- Admin user management
-- Refresh token rotation
+- JWT authentication with silent refresh token rotation
+- Role-based access control — Admin and Sales User
+- Lead CRUD with status tracking — New, Contacted, Qualified, Closed
+- Advanced filtering — status, source, search, sort — all combinable
+- Debounced search — 400ms delay, single API call per query
+- Backend pagination — 10 records per page with full metadata
+- CSV export with active filters applied
+- Admin panel — user management and role assignment
+- Rate limiting on login — 10 attempts per 15 minutes
 
-See the docs folder for additional policies and API reference: [docs/README.md](docs/README.md)
 
-## Quick setup
+---
 
-Prerequisites: Node 18+, npm or yarn, Docker (optional), MongoDB (local or remote)
+## Quick Start
 
-Recommended: run everything with Docker Compose (local development):
+### With Docker (recommended)
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/chhatraraj/smart-leads-dashboard.git
 cd gigflow
 
-# Copy the example env and update values
+# Windows
 copy .env.example server\.env
 
+# Mac / Linux
+cp .env.example server/.env
+
+# Fill in your MONGO_URI and JWT secrets in server/.env, then:
 docker compose up --build
 ```
 
-When running locally without Docker, start the backend and frontend in separate terminals:
+- Frontend → http://localhost:5173
+- Backend → http://localhost:5000
+- Health check → http://localhost:5000/api/health
+
+### Without Docker
 
 ```bash
-# Backend
+# Terminal 1 — Backend
 cd server
+cp ../.env.example .env
 npm install
-copy ..\.env.example .env   # edit MONGO_URI and secrets
 npm run dev
 
-# Frontend
+# Terminal 2 — Frontend
 cd client
 npm install
 npm run dev
 ```
 
-Frontend: http://localhost:5173
-API: http://localhost:5000
+---
 
-## Development
+## API Reference
 
-- Backend: `cd server` → `npm run dev` (uses `ts-node-dev`)
-- Frontend: `cd client` → `npm run dev` (Vite)
+Full request/response examples → [`docs/API.md`](docs/API.md)
 
-## Environment (.env)
+Postman collection → [`docs/gigflow.postman_collection.json`](docs/gigflow.postman_collection.json)
 
-Create a `.env` for the server (see `.env.example`). Important variables used by the project:
+### Auth — `/api/auth`
 
-- `NODE_ENV` — node environment (development / production)
-- `PORT` — backend port (default 5000)
-- `MONGO_URI` — MongoDB connection string
-- `JWT_SECRET` — access token secret (min 32 chars)
-- `JWT_REFRESH_SECRET` — refresh token secret (min 32 chars)
-- `JWT_ACCESS_EXPIRES` — e.g. `15m`
-- `JWT_REFRESH_EXPIRES` — e.g. `7d`
-- `CLIENT_URL` — frontend origin for CORS
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| POST | `/register` | — | Register new user, returns access token |
+| POST | `/login` | — | Login, returns access token + sets refresh cookie |
+| POST | `/refresh` | cookie | Issue new access token from refresh cookie |
+| POST | `/logout` | ✓ | Revoke refresh token, clear cookie |
+| GET | `/me` | ✓ | Return current authenticated user |
 
-Full example: see `.env.example` at the project root.
+### Leads — `/api/leads`
 
-## API Documentation
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| GET | `/` | ✓ | Paginated lead list with filters |
+| GET | `/:id` | ✓ | Single lead detail |
+| POST | `/` | ✓ | Create new lead |
+| PATCH | `/:id` | ✓ | Update lead fields |
+| DELETE | `/:id` | admin | Soft delete lead |
 
-See [docs/API.md](docs/API.md) for a concise endpoint reference, authentication flow, and example requests.
-
-## Project structure
-
+**Query parameters for GET `/`:**
 ```
-gigflow/
-├── docker-compose.yml
-├── README.md
-├── .env.example
-├── client/        # React frontend (Vite + TypeScript)
-└── server/        # Express API (TypeScript)
+?page=1&limit=10&status=new&source=Instagram&search=rahul&sort=latest
 ```
+All parameters are optional and combinable.
 
-## Docs and policies
+### Export — `/api/export`
 
-Documentation and policies are in the `docs/` folder. See [docs/README.md](docs/README.md).
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| GET | `/leads/csv` | ✓ | Download filtered leads as CSV |
 
-## Contributing
+### Users — `/api/users`
 
-- Fork the repository and open a PR
-- Keep changes small and focused
-- Run linting and tests before submitting
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| GET | `/` | admin | List all users with pagination |
+| PATCH | `/:id/role` | admin | Change a user's role |
+| DELETE | `/:id` | admin | Delete a user account |
 
-If you'd like, I can also commit these documentation files for you.
+---
+
+## Role Permissions
+
+| Action | Admin | Sales User |
+|---|---|---|
+| View all leads | ✓ | — |
+| View own leads | ✓ | ✓ |
+| Create lead | ✓ | ✓ |
+| Update own lead | ✓ | ✓ |
+| Update any lead | ✓ | — |
+| Delete lead | ✓ | — |
+| Export CSV | ✓ | ✓ (own leads only) |
+| Manage users | ✓ | — |
+
+Role is assigned by an existing admin — users cannot self-assign roles at registration.
+
+---
+
+## Database Choice — MongoDB
+
+This project uses MongoDB with Mongoose ODM.
+
+**Why MongoDB over PostgreSQL:**
+
+- **Schema flexibility** — optional fields (phone, company, notes) work naturally without nullable column overhead
+- **Document model** — a lead is a self-contained document with no joins needed across tables
+- **No migrations** — adding new fields requires no `ALTER TABLE` — just update the schema
+- **Mongoose hooks** — pre-save middleware handles bcrypt hashing cleanly at the model level
+
+**When PostgreSQL would be the better choice:**
+- Complex relational data requiring many joins
+- Strict ACID transactions across multiple tables
+- Heavy reporting and aggregations using SQL
+
+---
+
